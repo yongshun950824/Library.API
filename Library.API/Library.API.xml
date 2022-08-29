@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Library.API</name>
+    </assembly>
+    <members>
+        <member name="M:Library.API.Controllers.AuthorsController.GetAuthor(System.Guid)">
+            <summary>
+            Get an author by id
+            </summary>
+            <param name="authorId">Author's id</param>
+            <returns>ActionResult of Author type</returns>
+        </member>
+        <member name="M:Library.API.Controllers.AuthorsController.UpdateAuthor(System.Guid,Library.API.Models.AuthorForUpdate)">
+            <summary>
+            Update Author by id
+            </summary>
+            <param name="authorId">Author's id</param>
+            <param name="authorForUpdate">Author's data</param>
+            <returns>ActionResult of Author type. (Updated Author)</returns>
+        </member>
+        <member name="M:Library.API.Controllers.AuthorsController.UpdateAuthor(System.Guid,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{Library.API.Models.AuthorForUpdate})">
+            <summary>
+            Partially update an author.
+            </summary>
+            <param name="authorId">Author's id</param>
+            <param name="patchDocument">Set of operations to apply the author</param>
+            <returns>ActionResult of Author type</returns>
+            <remarks>
+            Sample request  \
+            PATCH /authors/id   \
+            [   \
+                {   \
+                    "op": "replace",    \
+                    "path": "/firstname",   \
+                    "value": "New first name"   \
+                }   \
+            ]
+            </remarks>
+        </member>
+        <member name="T:Library.API.Models.Author">
+            <summary>
+            Model for Author
+            </summary>
+        </member>
+        <member name="P:Library.API.Models.Author.Id">
+            <summary>
+            Author's id
+            </summary>
+        </member>
+        <member name="P:Library.API.Models.Author.FirstName">
+            <summary>
+            Author's first name
+            </summary>
+        </member>
+        <member name="P:Library.API.Models.Author.LastName">
+            <summary>
+            Author's last name
+            </summary>
+        </member>
+        <member name="T:Library.API.Models.AuthorForUpdate">
+            <summary>
+            Model for update Author action
+            </summary>
+        </member>
+        <member name="P:Library.API.Models.AuthorForUpdate.FirstName">
+            <summary>
+            Author's first name
+            </summary>
+        </member>
+        <member name="P:Library.API.Models.AuthorForUpdate.LastName">
+            <summary>
+            Author's last name
+            </summary>
+        </member>
+    </members>
+</doc>

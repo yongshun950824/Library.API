@@ -32,6 +32,11 @@ namespace Library.API.Controllers
             return Ok(_mapper.Map<IEnumerable<Author>>(authorsFromRepo));
         }
 
+        /// <summary>
+        /// Get an author by id
+        /// </summary>
+        /// <param name="authorId">Author's id</param>
+        /// <returns>ActionResult of Author type</returns>
         [HttpGet("{authorId}")]
         public async Task<ActionResult<Author>> GetAuthor(
             Guid authorId)
@@ -45,6 +50,12 @@ namespace Library.API.Controllers
             return Ok(_mapper.Map<Author>(authorFromRepo));
         }
 
+        /// <summary>
+        /// Update Author by id
+        /// </summary>
+        /// <param name="authorId">Author's id</param>
+        /// <param name="authorForUpdate">Author's data</param>
+        /// <returns>ActionResult of Author type. (Updated Author)</returns>
         [HttpPut("{authorId}")]
         public async Task<ActionResult<Author>> UpdateAuthor(
             Guid authorId,
@@ -66,6 +77,23 @@ namespace Library.API.Controllers
             return Ok(_mapper.Map<Author>(authorFromRepo)); 
         }
 
+        /// <summary>
+        /// Partially update an author.
+        /// </summary>
+        /// <param name="authorId">Author's id</param>
+        /// <param name="patchDocument">Set of operations to apply the author</param>
+        /// <returns>ActionResult of Author type</returns>
+        /// <remarks>
+        /// Sample request  \
+        /// PATCH /authors/id   \
+        /// [   \
+        ///     {   \
+        ///         "op": "replace",    \
+        ///         "path": "/firstname",   \
+        ///         "value": "New first name"   \
+        ///     }   \
+        /// ]
+        /// </remarks>
         [HttpPatch("{authorId}")]
         public async Task<ActionResult<Author>> UpdateAuthor(
             Guid authorId,
