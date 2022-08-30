@@ -47,6 +47,24 @@
             <returns>ActionResult of Book type</returns>
             <response code="200">Returns the requested book</response>
         </member>
+        <member name="M:Library.API.Controllers.BooksController.GetBookWithConcatenatedAuthorName(System.Guid,System.Guid)">
+            <summary>
+            Get a book by id for specific author 
+            </summary>
+            <param name="authorId">The id of the author</param>
+            <param name="bookId">The id of the book</param>
+            <returns>ActionResult of Book type</returns>
+            <response code="200">Returns the requested book</response>
+        </member>
+        <member name="M:Library.API.Controllers.BooksController.CreateBookWithAmountOfPages(System.Guid,Library.API.Models.BookForCreationWithAmountOfPages)">
+            <summary>
+            Create a book for a specific author
+            </summary>
+            <param name="authorId">The id of the book author</param>
+            <param name="bookForCreationWithAmountOfPages">The book to create</param>
+            <returns>An ActionResult of type Book</returns>
+            <response code="422">Validation error</response>
+        </member>
         <member name="T:Library.API.Models.Author">
             <summary>
             Model for Author

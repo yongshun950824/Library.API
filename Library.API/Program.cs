@@ -1,11 +1,12 @@
 using Library.API.Contexts;
+using Library.API.OperationFilters;
 using Library.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-[assembly:ApiConventionType(typeof(DefaultApiConventions))]
+[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -88,6 +89,9 @@ builder.Services.AddSwaggerGen(setupAction =>
                 Url = new Uri("https://opensource.org/licenses/MIT")
             }
         });
+
+    setupAction.OperationFilter<GetBookOperationFilter>();
+    setupAction.OperationFilter<CreateBookOperationFilter>();
 
     string xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, xmlCommentsFile);
