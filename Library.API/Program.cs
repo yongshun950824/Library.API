@@ -1,13 +1,45 @@
 using Library.API.Contexts;
 using Library.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
+[assembly:ApiConventionType(typeof(DefaultApiConventions))]
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(setupAction =>
+{
+    #region Set ProducesResponseTypeAttribute in global API level
+    //setupAction.Filters
+    //    .Add(new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
+
+    //setupAction.Filters
+    //    .Add(new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
+
+    //setupAction.Filters
+    //    .Add(new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
+    #endregion
+
+    setupAction.ReturnHttpNotAcceptable = true;
+
+    setupAction.OutputFormatters
+        .Add(new XmlSerializerOutputFormatter());
+
+    var jsonOutputFormatter = setupAction.OutputFormatters
+        .OfType<SystemTextJsonOutputFormatter>().FirstOrDefault();
+
+    if (jsonOutputFormatter != null)
+    {
+        // remove text/json as it isn't the approved media type
+        // for working with JSON at API level
+        if (jsonOutputFormatter.SupportedMediaTypes.Contains("text/json"))
+        {
+            jsonOutputFormatter.SupportedMediaTypes.Remove("text/json");
+        }
+    }
+});
 
 var connectionString = builder.Configuration["ConnectionStrings:LibraryDBConnectionString"];
 builder.Services.AddDbContext<LibraryContext>(o => o.UseSqlServer(connectionString));
@@ -84,6 +116,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

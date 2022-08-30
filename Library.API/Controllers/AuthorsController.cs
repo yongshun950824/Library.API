@@ -57,6 +57,9 @@ namespace Library.API.Controllers
         /// <param name="authorForUpdate">Author's data</param>
         /// <returns>ActionResult of Author type. (Updated Author)</returns>
         [HttpPut("{authorId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<Author>> UpdateAuthor(
             Guid authorId,
             AuthorForUpdate authorForUpdate)

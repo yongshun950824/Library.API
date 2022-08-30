@@ -8,8 +8,12 @@ using System.Threading.Tasks;
 
 namespace Library.API.Controllers
 {
+    [Produces("application/json", "application/xml")]
     [Route("api/authors/{authorId}/books")]
     [ApiController]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class BooksController : ControllerBase
     { 
         private readonly IBookRepository _bookRepository;
@@ -27,6 +31,9 @@ namespace Library.API.Controllers
         }
        
         [HttpGet()]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks(
         Guid authorId )
         {
@@ -39,6 +46,15 @@ namespace Library.API.Controllers
             return Ok(_mapper.Map<IEnumerable<Book>>(booksFromRepo));
         }
 
+        /// <summary>
+        /// Get a book by id for specific author 
+        /// </summary>
+        /// <param name="authorId">The id of the author</param>
+        /// <param name="bookId">The id of the book</param>
+        /// <returns>ActionResult of Book type</returns>
+        /// <response code="200">Returns the requested book</response>
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet("{bookId}")]
         public async Task<ActionResult<Book>> GetBook(
             Guid authorId,
@@ -60,6 +76,10 @@ namespace Library.API.Controllers
 
 
         [HttpPost()]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<ActionResult<Book>> CreateBook(
             Guid authorId,
             [FromBody] BookForCreation bookForCreation)
