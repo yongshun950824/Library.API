@@ -238,6 +238,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(setupAction =>
     {
+        setupAction.InjectStylesheet("/Assets/custom-ui.css");
+        setupAction.IndexStream = () => Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("Library.API.EmbeddedAssets.index.html");
+
         foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
         {
             setupAction.SwaggerEndpoint($"/swagger/" +
@@ -252,6 +256,12 @@ if (app.Environment.IsDevelopment())
         //setupAction.SwaggerEndpoint(
         //    "/swagger/Lbrary.OpenAPI.Specs.Books/swagger.json",
         //    "Library API (Books)");
+
+        setupAction.DefaultModelExpandDepth(2);
+        setupAction.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Model);
+        setupAction.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        setupAction.EnableDeepLinking();
+        setupAction.DisplayOperationId();
     });
 }
 

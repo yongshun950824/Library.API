@@ -85,15 +85,17 @@ namespace Library.API.Controllers
         /// <param name="patchDocument">Set of operations to apply the author</param>
         /// <returns>ActionResult of Author type</returns>
         /// <remarks>
-        /// Sample request  \
-        /// PATCH /authors/id   \
-        /// [   \
-        ///     {   \
-        ///         "op": "replace",    \
-        ///         "path": "/firstname",   \
-        ///         "value": "New first name"   \
-        ///     }   \
-        /// ]
+        /// Sample request  
+        /// ```
+        /// PATCH /authors/id   
+        /// [   
+        ///     {   
+        ///         "op": "replace",    
+        ///         "path": "/firstname",   
+        ///         "value": "New first name"   
+        ///      }   
+        /// ] 
+        /// ```
         /// </remarks>
         [HttpPatch("{authorId}")]
         public async Task<ActionResult<Author>> UpdateAuthor(
