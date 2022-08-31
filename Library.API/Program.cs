@@ -1,9 +1,16 @@
+using Library.API.Authentication;
 using Library.API.Contexts;
 using Library.API.OperationFilters;
 using Library.API.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using System.Reflection;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
@@ -13,15 +20,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(setupAction =>
 {
     #region Set ProducesResponseTypeAttribute in global API level
-    //setupAction.Filters
-    //    .Add(new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
+    setupAction.Filters
+        .Add(new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
 
-    //setupAction.Filters
-    //    .Add(new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
+    setupAction.Filters
+        .Add(new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
 
-    //setupAction.Filters
-    //    .Add(new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
+    setupAction.Filters
+        .Add(new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
+
+    setupAction.Filters
+        .Add(new ProducesResponseTypeAttribute(StatusCodes.Status401Unauthorized));
+
+    setupAction.Filters
+        .Add(new ProducesDefaultResponseTypeAttribute());
     #endregion
+
+    setupAction.Filters.Add(new AuthorizeFilter());
 
     setupAction.ReturnHttpNotAcceptable = true;
 
@@ -66,29 +81,138 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+builder.Services.AddVersionedApiExplorer(setupAction =>
+{
+    setupAction.GroupNameFormat = "'v'VV";
+});
+
+builder.Services.AddAuthentication("Basic")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
+
+builder.Services.AddApiVersioning(setupAction =>
+{
+    setupAction.AssumeDefaultVersionWhenUnspecified = true;
+    setupAction.DefaultApiVersion = new ApiVersion(1, 0);
+    setupAction.ReportApiVersions = true;
+
+    // Version in header
+    //setupAction.ApiVersionReader = new HeaderApiVersionReader("api-version");
+
+    // Version in media type
+    //setupAction.ApiVersionReader = new MediaTypeApiVersionReader();
+});
+
+var apiVersionDescriptionProvider = builder.Services
+    .BuildServiceProvider()
+    .GetService<IApiVersionDescriptionProvider>()!;
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setupAction =>
 {
-    setupAction.SwaggerDoc(
-        "Lbrary.OpenAPI.Specs",
-        new Microsoft.OpenApi.Models.OpenApiInfo
+    foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+    {
+        setupAction.SwaggerDoc(
+            $"Lbrary.OpenAPI.Specs.{description.GroupName}",
+            new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "Library API Spec.",
+                Version = description.ApiVersion.ToString(),
+                Description = "API for access authors and books.",
+                Contact = new Microsoft.OpenApi.Models.OpenApiContact
+                {
+                    Email = "yongshun950824@gmail.com",
+                    Name = "Yong Shun",
+                    Url = new Uri("https://github.com/yongshun950824")
+                },
+                License = new Microsoft.OpenApi.Models.OpenApiLicense
+                {
+                    Name = "MIT License",
+                    Url = new Uri("https://opensource.org/licenses/MIT")
+                }
+            });
+    }
+
+    //setupAction.SwaggerDoc(
+    //    "Lbrary.OpenAPI.Specs.Authors",
+    //    new Microsoft.OpenApi.Models.OpenApiInfo
+    //    {
+    //        Title = "Library API Spec. (Authors)",
+    //        Version = "1",
+    //        Description = "API for access authors.",
+    //        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+    //        {
+    //            Email = "yongshun950824@gmail.com",
+    //            Name = "Yong Shun",
+    //            Url = new Uri("https://github.com/yongshun950824")
+    //        },
+    //        License = new Microsoft.OpenApi.Models.OpenApiLicense
+    //        {
+    //            Name = "MIT License",
+    //            Url = new Uri("https://opensource.org/licenses/MIT")
+    //        }
+    //    });
+
+    //setupAction.SwaggerDoc(
+    //    "Lbrary.OpenAPI.Specs.Books",
+    //    new Microsoft.OpenApi.Models.OpenApiInfo
+    //    {
+    //        Title = "Library API Spec. (Books)",
+    //        Version = "1",
+    //        Description = "API for access books.",
+    //        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+    //        {
+    //            Email = "yongshun950824@gmail.com",
+    //            Name = "Yong Shun",
+    //            Url = new Uri("https://github.com/yongshun950824")
+    //        },
+    //        License = new Microsoft.OpenApi.Models.OpenApiLicense
+    //        {
+    //            Name = "MIT License",
+    //            Url = new Uri("https://opensource.org/licenses/MIT")
+    //        }
+    //    });
+
+    setupAction.AddSecurityDefinition("basicAuth", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "basic",
+        Description = "Require Username and Password to access."
+    });
+
+    setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
         {
-            Title = "Library API",
-            Version = "1",
-            Description = "API for manage books and authors.",
-            Contact = new Microsoft.OpenApi.Models.OpenApiContact
+            new OpenApiSecurityScheme
             {
-                Email = "yongshun950824@gmail.com",
-                Name = "Yong Shun",
-                Url = new Uri("https://github.com/yongshun950824")
-            },
-            License = new Microsoft.OpenApi.Models.OpenApiLicense
-            {
-                Name = "MIT License",
-                Url = new Uri("https://opensource.org/licenses/MIT")
-            }
-        });
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "basicAuth"
+                }
+            }, new List<string> {}
+        }
+    });
+
+    setupAction.DocInclusionPredicate((documentName, apiDescription) =>
+    {
+        var actionApiVersionModel = apiDescription.ActionDescriptor
+            .GetApiVersionModel(ApiVersionMapping.Explicit | ApiVersionMapping.Implicit);
+
+        if (actionApiVersionModel == null)
+        {
+            return true;
+        }
+
+        if (actionApiVersionModel.DeclaredApiVersions.Any())
+        {
+            return actionApiVersionModel.DeclaredApiVersions.Any(v =>
+                $"Lbrary.OpenAPI.Specs.v{v}" == documentName);
+        }
+
+        return actionApiVersionModel.ImplementedApiVersions.Any(v =>
+            $"Lbrary.OpenAPI.Specs.v{v}" == documentName);
+    });
 
     setupAction.OperationFilter<GetBookOperationFilter>();
     setupAction.OperationFilter<CreateBookOperationFilter>();
@@ -98,6 +222,7 @@ builder.Services.AddSwaggerGen(setupAction =>
 
     setupAction.IncludeXmlComments(fullPath);
 });
+
 
 #region Repository
 builder.Services.AddScoped<IBookRepository, BookRepository>();
@@ -113,9 +238,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(setupAction =>
     {
-        setupAction.SwaggerEndpoint(
-            "/swagger/Lbrary.OpenAPI.Specs/swagger.json",
-            "Library API");
+        foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+        {
+            setupAction.SwaggerEndpoint($"/swagger/" +
+                $"Lbrary.OpenAPI.Specs.{description.GroupName}/swagger.json",
+                description.GroupName.ToUpperInvariant());
+        }
+
+        //setupAction.SwaggerEndpoint(
+        //    "/swagger/Lbrary.OpenAPI.Specs.Authors/swagger.json",
+        //    "Library API (Authors)");
+
+        //setupAction.SwaggerEndpoint(
+        //    "/swagger/Lbrary.OpenAPI.Specs.Books/swagger.json",
+        //    "Library API (Books)");
     });
 }
 
@@ -123,7 +259,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-app.UseAuthorization();
+app.UseAuthentication();
+
+//app.UseAuthorization();
 
 app.MapControllers();
 

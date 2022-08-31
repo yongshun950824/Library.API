@@ -3,14 +3,12 @@ using Library.API.Models;
 using Library.API.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Library.API.Controllers
 {
-
-    [Route("api/authors")]
+    [Produces("application/json", "application/xml")]
+    [Route("api/v{version:apiVersion}/authors")]
+    //[ApiExplorerSettings(GroupName = "Lbrary.OpenAPI.Specs.Authors")]
     [ApiController]
     public class AuthorsController : ControllerBase
     {
@@ -77,7 +75,7 @@ namespace Library.API.Controllers
             await _authorsRepository.SaveChangesAsync();
 
             // return the author
-            return Ok(_mapper.Map<Author>(authorFromRepo)); 
+            return Ok(_mapper.Map<Author>(authorFromRepo));
         }
 
         /// <summary>

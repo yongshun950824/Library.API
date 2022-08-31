@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Library.API.Controllers
 {
     [Produces("application/json", "application/xml")]
-    [Route("api/authors/{authorId}/books")]
+    [Route("api/authors/v{version:apiVersion}/{authorId}/books")]
+    //[ApiExplorerSettings(GroupName = "Lbrary.OpenAPI.Specs.Books")]
     [ApiController]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status406NotAcceptable)]

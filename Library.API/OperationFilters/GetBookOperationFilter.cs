@@ -21,7 +21,7 @@ namespace Library.API.OperationFilters
                     // Archive
                     // Schema = context.SchemaRegistry.GetOrRegister(typeof(BookWithConcatenatedAuthorName))
                     Schema = schema
-                }) ;
+                });
         }
     }
 }
